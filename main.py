@@ -12,26 +12,43 @@ SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
 
 phase = 0
+time_started = False
+timer = None
 
 
 # ---------------------------- TIMER RESET ------------------------------- #
 
-# ---------------------------- TIMER MECHANISM ------------------------------- # 
+def reset_timer():
+    window.after_cancel(timer)
+
+    top_text.config(text="Timer", fg=GREEN)
+    canvas.itemconfig(time_canvas, text="00:00")
+    tick_mark.config(text="")
+
+    global phase, time_started
+    phase = 0
+    time_started = False
+
+
+# ---------------------------- TIMER MECHANISM ------------------------------- #
 
 def start_timer():
-    global phase
+    global time_started, phase
 
-    phase += 1
+    if not time_started:
+        time_started = True
 
-    if phase % 8 == 0:
-        count_down(LONG_BREAK_MIN * 60)
-        top_text.config(text="Break", fg=RED)
-    elif phase % 2 == 0:
-        count_down(SHORT_BREAK_MIN * 60)
-        top_text.config(text="Break", fg=PINK)
-    else:
-        count_down(WORK_MIN * 60)
-        top_text.config(text="Work", fg=GREEN)
+        phase += 1
+
+        if phase % 8 == 0:
+            count_down(LONG_BREAK_MIN * 60)
+            top_text.config(text="Break", fg=RED)
+        elif phase % 2 == 0:
+            count_down(SHORT_BREAK_MIN * 60)
+            top_text.config(text="Break", fg=PINK)
+        else:
+            count_down(WORK_MIN * 60)
+            top_text.config(text="Work", fg=GREEN)
 
 
 # ---------------------------- COUNTDOWN MECHANISM ------------------------------- #
@@ -51,7 +68,9 @@ def count_down(count):
 
     canvas.itemconfig(time_canvas, text=f"{minutes}:{seconds}")
     if count > 0:
-        window.after(2, count_down, count - 1)
+        # assign window.after to variable to be able to stop the timer with reset
+        global timer
+        timer = window.after(1000, count_down, count - 1)
     else:
         start_timer()
         if phase % 2 == 0:
@@ -87,6 +106,7 @@ start_button.config(command=start_timer)
 start_button.grid(column=0, row=2)
 
 reset_button = Button(text="Reset", activebackground=GREEN, bg="white", bd=0, font=(FONT_NAME, 10, "normal"))
+reset_button.config(command=reset_timer)
 reset_button.grid(column=2, row=2)
 
 window.mainloop()
