@@ -10,25 +10,54 @@ TICK_MARK = "✔"
 WORK_MIN = 25
 SHORT_BREAK_MIN = 5
 LONG_BREAK_MIN = 20
-CURRENT_STATE = {
-    "Timer": GREEN,
-    "Work": GREEN,
-    "Break": RED,
-}
 
-# ---------------------------- TIMER RESET ------------------------------- # 
+phase = 0
+
+
+# ---------------------------- TIMER RESET ------------------------------- #
 
 # ---------------------------- TIMER MECHANISM ------------------------------- # 
 
 def start_timer():
-    count_down(5)
+    global phase
 
-# ---------------------------- COUNTDOWN MECHANISM ------------------------------- # 
+    phase += 1
+
+    if phase % 8 == 0:
+        count_down(LONG_BREAK_MIN * 60)
+        top_text.config(text="Break", fg=RED)
+    elif phase % 2 == 0:
+        count_down(SHORT_BREAK_MIN * 60)
+        top_text.config(text="Break", fg=PINK)
+    else:
+        count_down(WORK_MIN * 60)
+        top_text.config(text="Work", fg=GREEN)
+
+
+# ---------------------------- COUNTDOWN MECHANISM ------------------------------- #
 
 def count_down(count):
-    canvas.itemconfig(time_canvas, text=count)
+    # format time to display in mins and seconds e.g. "04:22"
+
+    minutes = count // 60
+    seconds = count % 60
+
+    # use dynamic typing to format time
+
+    if minutes < 10:
+        minutes = f"0{minutes}"
+    if seconds < 10:
+        seconds = f"0{seconds}"
+
+    canvas.itemconfig(time_canvas, text=f"{minutes}:{seconds}")
     if count > 0:
-        window.after(1000, count_down, count - 1)
+        window.after(2, count_down, count - 1)
+    else:
+        start_timer()
+        if phase % 2 == 0:
+            current_text = tick_mark.cget("text")
+            tick_mark.config(text=current_text + TICK_MARK)
+
 
 # ---------------------------- UI SETUP ------------------------------- #
 window = Tk()
@@ -49,7 +78,7 @@ top_text = Label()
 top_text.config(text="Timer", fg=GREEN, bg=YELLOW, font=(FONT_NAME, 40, "bold"))
 top_text.grid(column=1, row=0)
 
-tick_mark = Label(text=TICK_MARK, bg=YELLOW, fg=GREEN)
+tick_mark = Label(bg=YELLOW, fg=GREEN)
 tick_mark.grid(column=1, row=3)
 
 # buttons
