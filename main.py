@@ -75,7 +75,7 @@ def count_down(count):
     if count > 0:
         # assign window.after to variable to be able to stop the timer with reset
         global timer
-        timer = window.after(10, count_down, count - 1)
+        timer = window.after(1000, count_down, count - 1)
     else:
         start_timer()
         if phase % 2 == 0:
